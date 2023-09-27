@@ -85,7 +85,8 @@ class OptimizationParams(ParamGroup):
         self.densification_interval = 100 # [default 100] Increase this to avoid running out of memory (how many iterations in between densifying/splitting gaussians)
         self.opacity_reset_interval = 1000 # [default 3000] Decrease all opacities (alpha) close to zero -> algo will automatically increase opacities again for important gaussians -> cull the rest
         self.densify_from_iter = 500 # [default 500] After this many iterations, start densifying
-        self.densify_until_iter = 0.5 * self.iterations # [default 15_000] Decrease this to avoid running out of memory (after this many iterations, stop densifying)
+        self.densify_until_iter = 0.8 * self.iterations # [default 15_000] After this many iterations, stop densification
+        self.densify_until_iter_start_increase = 0.5 * self.iterations # After this many iterations, make it harder to densify (value should be lower than densify_until_iter)
         self.densify_grad_threshold_init = 0.0002 # [default 0.0002; Section 5.2: tau_pos] Increase this to avoid running out of memory. If very high, no densification will occur
         self.densify_grad_threshold_final = 0.002 # See densify_grad_threshold_start_increase
         self.densify_grad_threshold_start_increase = 0.6 # [0-1] Start increasing densify_grad_threshold from init -> final once there are densify_grad_threshold_start_increase * max_num_splats of splats

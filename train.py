@@ -118,13 +118,20 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
                 if iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
                     size_threshold = 20 if iteration > opt.opacity_reset_interval else None
-                    densify_grad_threshold = opt.densify_grad_threshold_init
+                    # Set densify_grad_threshold between densify_grad_threshold_init & densify_grad_threshold_final
+                    ratio = 0 # [0-1] where 0 -> densify_grad_threshold_init and 1 -> densify_grad_threshold_final
                     num_splats_start_increase = opt.max_num_splats * opt.densify_grad_threshold_start_increase
                     if num_gauss > num_splats_start_increase:
-                        ratio = (num_gauss - num_splats_start_increase) / (opt.max_num_splats - num_splats_start_increase)
-                        constA = opt.densify_grad_threshold_init
-                        constB = math.log(opt.densify_grad_threshold_final / opt.densify_grad_threshold_init)
-                        densify_grad_threshold = constA * math.exp(constB * ratio)
+                        ratio1 = (num_gauss - num_splats_start_increase) / (opt.max_num_splats - num_splats_start_increase)
+                        if ratio1 > ratio and ratio1 <= 1:
+                            ratio = ratio1
+                    if iteration > opt.densify_until_iter_start_increase:
+                        ratio2 = (iteration - opt.densify_until_iter_start_increase) / (opt.densify_until_iter - opt.densify_until_iter_start_increase)
+                        if ratio2 > ratio and ratio2 <= 1:
+                            ratio = ratio2
+                    constA = opt.densify_grad_threshold_init
+                    constB = math.log(opt.densify_grad_threshold_final / opt.densify_grad_threshold_init)
+                    densify_grad_threshold = constA * math.exp(constB * ratio)
                     gaussians.densify_and_prune(densify_grad_threshold, 0.005, scene.cameras_extent, size_threshold)
                 
                 if iteration % opt.opacity_reset_interval == 0 or (dataset.white_background and iteration == opt.densify_from_iter):
