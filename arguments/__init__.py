@@ -71,7 +71,7 @@ class PipelineParams(ParamGroup):
 class OptimizationParams(ParamGroup):
     def __init__(self, parser):
         self.max_num_splats = 3_000_000 # Stop densifying after this number of splats is reached
-        self.iterations = 15_000 # [default 30_000] Each iteration corresponds to reconstructing 1 image. The number of points being optimized increases over
+        self.iterations = 10_000 # [default 30_000] Each iteration corresponds to reconstructing 1 image. The number of points being optimized increases over
         self.position_lr_init = 0.00016 # [default 0.00016] Learning rate should be smaller for more extensive scenes
         self.position_lr_final = 0.0000016 # [default 0.0000016] Learning rate should be smaller for more extensive scenes
         self.position_lr_delay_mult = 0.01 # [default 0.01]
@@ -86,7 +86,9 @@ class OptimizationParams(ParamGroup):
         self.opacity_reset_interval = 1000 # [default 3000] Decrease all opacities (alpha) close to zero -> algo will automatically increase opacities again for important gaussians -> cull the rest
         self.densify_from_iter = 500 # [default 500] After this many iterations, start densifying
         self.densify_until_iter = 0.5 * self.iterations # [default 15_000] Decrease this to avoid running out of memory (after this many iterations, stop densifying)
-        self.densify_grad_threshold = 0.0002 # [default 0.0002; Section 5.2: tau_pos] Increase this to avoid running out of memory. If very high, no densification will occur
+        self.densify_grad_threshold_init = 0.0002 # [default 0.0002; Section 5.2: tau_pos] Increase this to avoid running out of memory. If very high, no densification will occur
+        self.densify_grad_threshold_final = 0.002 # See densify_grad_threshold_start_increase
+        self.densify_grad_threshold_start_increase = 0.6 # [0-1] Start increasing densify_grad_threshold from init -> final once there are densify_grad_threshold_start_increase * max_num_splats of splats
         super().__init__(parser, "Optimization Parameters")
 
 def get_combined_args(parser : ArgumentParser):

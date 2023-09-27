@@ -11,6 +11,7 @@
 
 import os
 import torch
+import math
 from random import randint
 from utils.loss_utils import l1_loss, ssim
 from gaussian_renderer import render, network_gui
@@ -117,7 +118,14 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
                 if iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
                     size_threshold = 20 if iteration > opt.opacity_reset_interval else None
-                    gaussians.densify_and_prune(opt.densify_grad_threshold, 0.005, scene.cameras_extent, size_threshold)
+                    densify_grad_threshold = opt.densify_grad_threshold_init
+                    num_splats_start_increase = opt.max_num_splats * opt.densify_grad_threshold_start_increase
+                    if num_gauss > num_splats_start_increase:
+                        ratio = (num_gauss - num_splats_start_increase) / (opt.max_num_splats - num_splats_start_increase)
+                        constA = opt.densify_grad_threshold_init
+                        constB = math.log(opt.densify_grad_threshold_final / opt.densify_grad_threshold_init)
+                        densify_grad_threshold = constA * math.exp(constB * ratio)
+                    gaussians.densify_and_prune(densify_grad_threshold, 0.005, scene.cameras_extent, size_threshold)
                 
                 if iteration % opt.opacity_reset_interval == 0 or (dataset.white_background and iteration == opt.densify_from_iter):
                     gaussians.reset_opacity()
@@ -201,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
     parser.add_argument("--test_iterations", nargs="+", type=int, default=[])
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=[7_000, 15_000])
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
