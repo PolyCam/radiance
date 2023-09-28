@@ -82,6 +82,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             print('num_training_images = ' + str(num_training_images))
             if num_training_images < opt.min_num_registered_images:
                 print('\n\nError: ColMap failed\n\n')
+                with open(os.path.join(scene.model_path, "failed.txt"), 'w') as f:
+                    f.write('ColMap failed: ' + str(num_training_images) + ' images registered')
         if num_training_images < opt.min_num_registered_images and iteration < opt.iterations:
             continue
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack)-1))
