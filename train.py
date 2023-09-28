@@ -49,7 +49,6 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, opt.iterations), desc="Training progress")
     first_iter += 1
-    num_training_images = -1
     for iteration in range(first_iter, opt.iterations + 1):        
         if network_gui.conn == None:
             network_gui.try_connect()
@@ -81,11 +80,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             num_training_images = len(viewpoint_stack)
             print('num_training_images = ' + str(num_training_images))
             if num_training_images < opt.min_num_registered_images:
-                print('\n\nError: ColMap failed\n\n')
-                with open(os.path.join(scene.model_path, "failed.txt"), 'w') as f:
-                    f.write('ColMap failed: ' + str(num_training_images) + ' images registered')
-        if num_training_images < opt.min_num_registered_images and iteration < opt.iterations:
-            continue
+                raise Exception("Not enough training images registerd by ColMap")
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack)-1))
 
         # Render
@@ -157,6 +152,9 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             if (iteration in checkpoint_iterations):
                 print("\n[ITER {}] Saving Checkpoint".format(iteration))
                 torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
+    if num_training_images < opt.min_num_registered_images:
+        return -1
+    return 0
 
 def prepare_output_and_logger(args):    
     if not args.model_path:
