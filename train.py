@@ -152,9 +152,6 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             if (iteration in checkpoint_iterations):
                 print("\n[ITER {}] Saving Checkpoint".format(iteration))
                 torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
-    if num_training_images < opt.min_num_registered_images:
-        return -1
-    return 0
 
 def prepare_output_and_logger(args):    
     if not args.model_path:
