@@ -76,6 +76,11 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # Pick a random Camera
         if not viewpoint_stack:
             viewpoint_stack = scene.getTrainCameras().copy()
+        if iteration == 1:
+            num_training_images = len(viewpoint_stack)
+            print('num_training_images = ' + str(num_training_images))
+            if num_training_images < opt.min_num_registered_images:
+                raise Exception("Not enough training images registerd by ColMap")
         viewpoint_cam = viewpoint_stack.pop(randint(0, len(viewpoint_stack)-1))
 
         # Render
