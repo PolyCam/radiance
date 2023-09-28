@@ -72,7 +72,7 @@ class OptimizationParams(ParamGroup):
     def __init__(self, parser):
         self.max_num_splats = 5_000_000 # Stop densifying after this number of splats is reached
         self.iterations = 10_000 # [default 30_000] Each iteration corresponds to reconstructing 1 image. The number of points being optimized increases over
-        self.min_num_registered_images = 20 # If less than this number of images registered by ColMap -> don't run gaussian splatting
+        self.min_num_registered_images = 15 # If less than this number of images registered by ColMap -> don't run gaussian splatting
         self.position_lr_init = 0.00016 # [default 0.00016] Learning rate should be smaller for more extensive scenes
         self.position_lr_final = 0.0000016 # [default 0.0000016] Learning rate should be smaller for more extensive scenes
         self.position_lr_delay_mult = 0.01 # [default 0.01]
